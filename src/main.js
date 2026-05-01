@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { initAnimation, updateAnimation } from "./animation.js";
 
 // ── Scene ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -41,7 +42,7 @@ controls.dampingFactor = 0.05;
 controls.target.set(0, 1, 0);
 
 // ── Floor plane ──────────────────────────────────────────────────────────────
-const plane = new THREE.Mesh(
+export const plane = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
   new THREE.MeshStandardMaterial({ color: 0x2a2a4a })
 );
@@ -85,8 +86,11 @@ function loadModel(name) {
 Promise.all(MODEL_PARTS.map(loadModel))
   .then(() => {
     console.log("All models loaded. Face meshes with morphs:", faceMeshes.length);
+    initAnimation(scene);
     if (faceMeshes.length > 0) {
-      import("./ui.js").then(({ initUI }) => initUI(faceMeshes));
+      import("./ui.js").then(({ initUI }) =>
+        initUI(faceMeshes, scene, plane, ambientLight, dirLight)
+      );
     }
   })
   .catch((err) => console.error("Model load error:", err));
@@ -99,9 +103,17 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
+// ── Clock for delta time ──────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+let prevTime = 0;
+
 // ── Render loop ──────────────────────────────────────────────────────────────
 function animate() {
   requestAnimationFrame(animate);
+  const elapsed = clock.getElapsedTime();
+  const delta   = elapsed - prevTime;
+  prevTime = elapsed;
+  updateAnimation(elapsed, delta, faceMeshes);
   controls.update();
   renderer.render(scene, camera);
 }

@@ -1,4 +1,5 @@
 import { EMOTIONS, setMorph, applyEmotion } from './morphs.js';
+import { BACKGROUNDS, LIGHTINGS, applyBackground, applyLighting } from './environment.js';
 
 // ── Emotion button metadata ───────────────────────────────────────────────────
 const EMOTION_META = [
@@ -28,14 +29,25 @@ const CONTROLS = [
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let _meshes = [];
-const sliderMap = new Map(); // label → <input>
+let _meshes       = [];
+let _scene        = null;
+let _floor        = null;
+let _ambientLight = null;
+let _dirLight     = null;
+const sliderMap   = new Map(); // label → <input>
 
 // ── Public API ────────────────────────────────────────────────────────────────
-export function initUI(meshes) {
-  _meshes = meshes;
+export function initUI(meshes, scene, floor, ambientLight, dirLight) {
+  _meshes       = meshes;
+  _scene        = scene;
+  _floor        = floor;
+  _ambientLight = ambientLight;
+  _dirLight     = dirLight;
+
   buildEmotionButtons();
   buildSliders();
+  buildBackgrounds();
+  buildLightings();
   document.getElementById('controls-panel').style.display = 'flex';
 
   // Toggle panel open/close
@@ -104,4 +116,40 @@ function syncSliders() {
       input.value = mesh.morphTargetInfluences[idx];
     }
   });
+}
+
+// ── Background buttons ────────────────────────────────────────────────────────
+function buildBackgrounds() {
+  const container = document.getElementById('bg-buttons');
+  Object.entries(BACKGROUNDS).forEach(([key, preset]) => {
+    const btn = document.createElement('button');
+    btn.className = 'env-btn';
+    btn.textContent = preset.label;
+    btn.dataset.key = key;
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.env-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyBackground(_scene, _floor, key);
+    });
+    container.appendChild(btn);
+  });
+  container.querySelector('[data-key="studio"]')?.classList.add('active');
+}
+
+// ── Lighting buttons ──────────────────────────────────────────────────────────
+function buildLightings() {
+  const container = document.getElementById('lighting-buttons');
+  Object.entries(LIGHTINGS).forEach(([key, preset]) => {
+    const btn = document.createElement('button');
+    btn.className = 'env-btn';
+    btn.textContent = preset.label;
+    btn.dataset.key = key;
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.env-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyLighting(_ambientLight, _dirLight, key);
+    });
+    container.appendChild(btn);
+  });
+  container.querySelector('[data-key="default"]')?.classList.add('active');
 }
