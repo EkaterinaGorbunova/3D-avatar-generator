@@ -10,6 +10,7 @@ const EMOTION_META = [
   { key: 'surprised', emoji: '😲', label: 'Surprised' },
   { key: 'disgusted', emoji: '🤢', label: 'Disgusted' },
   { key: 'fear',      emoji: '😨', label: 'Fear' },
+  { key: 'wink',      emoji: '😉', label: 'Wink' },
 ];
 
 // ── Slider controls (symmetric pairs share one slider) ────────────────────────

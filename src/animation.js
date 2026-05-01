@@ -1,8 +1,8 @@
 import { setMorph } from './morphs.js';
 
-// ── Bone refs ─────────────────────────────────────────────────────────────────
-let headBone  = null;
-let spineBone = null;
+// ── Bone refs (arrays — one entry per GLB skeleton copy) ─────────────────────
+const headBones  = [];
+const spineBones = [];
 
 // ── Blink state ───────────────────────────────────────────────────────────────
 let blinkProgress = 0;
@@ -17,18 +17,14 @@ function randomBlinkInterval() {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export function initAnimation(scene) {
-  let spine = null, spine1 = null, spine2 = null;
-
+  // Each GLB part carries its own copy of the full skeleton.
+  // We collect every instance so all parts animate in sync.
   scene.traverse((obj) => {
     if (!obj.isBone) return;
-    const n = obj.name;
-    if (n === 'Head')   headBone = obj;
-    if (n === 'Spine')  spine    = obj;
-    if (n === 'Spine1') spine1   = obj;
-    if (n === 'Spine2') spine2   = obj;
+    if (obj.name === 'Head')   headBones.push(obj);
+    if (obj.name === 'Spine2') spineBones.push(obj);
   });
-
-  spineBone = spine2 ?? spine1 ?? spine;
+  console.log(`[animation] Head bones: ${headBones.length}, Spine2 bones: ${spineBones.length}`);
 }
 
 export function updateAnimation(elapsed, delta, faceMeshes) {
@@ -39,16 +35,20 @@ export function updateAnimation(elapsed, delta, faceMeshes) {
 
 // ── Idle head sway ────────────────────────────────────────────────────────────
 function updateIdle(t) {
-  if (!headBone) return;
-  headBone.rotation.y = Math.sin(t * 0.4)  * 0.04;  // gentle left-right
-  headBone.rotation.x = Math.sin(t * 0.25) * 0.02;  // slight up-down nod
-  headBone.rotation.z = Math.sin(t * 0.3)  * 0.01;  // tiny tilt
+  const ry = Math.sin(t * 0.6)  * 0.12; // left-right ~7°
+  const rx = Math.sin(t * 0.4)  * 0.07; // up-down nod ~4°
+  const rz = Math.sin(t * 0.5)  * 0.04; // tilt ~2°
+  headBones.forEach((bone) => {
+    bone.rotation.y = ry;
+    bone.rotation.x = rx;
+    bone.rotation.z = rz;
+  });
 }
 
 // ── Breathing ─────────────────────────────────────────────────────────────────
 function updateBreathing(t) {
-  if (!spineBone) return;
-  spineBone.rotation.x = Math.sin(t * 0.5) * 0.015; // chest rise at ~0.5 Hz
+  const rx = Math.sin(t * 0.7) * 0.05; // chest rise ~3°
+  spineBones.forEach((bone) => { bone.rotation.x = rx; });
 }
 
 // ── Blink loop ────────────────────────────────────────────────────────────────

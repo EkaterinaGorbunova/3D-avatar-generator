@@ -45,6 +45,12 @@ export const EMOTIONS = {
     mouthStretchLeft: 0.4, mouthStretchRight: 0.4,
     jawOpen: 0.2,
   },
+
+  wink: {
+    eyeBlinkRight: 1.0,
+    mouthSmileLeft: 0.5, mouthSmileRight: 0.5,
+    cheekSquintLeft: 0.3, cheekSquintRight: 0.3,
+  },
 };
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
