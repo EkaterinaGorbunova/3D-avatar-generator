@@ -60,6 +60,7 @@ const MODEL_PARTS = [
 ];
 
 const loader = new GLTFLoader();
+const faceMeshes = []; // meshes with morph targets (Wolf3D_Head, Wolf3D_Teeth)
 
 function loadModel(name) {
   return new Promise((resolve, reject) => {
@@ -67,7 +68,10 @@ function loadModel(name) {
       `/assets/${name}.glb`,
       (glb) => {
         glb.scene.traverse((child) => {
-          if (child.isMesh) child.castShadow = true;
+          if (child.isMesh) {
+            child.castShadow = true;
+            if (child.morphTargetDictionary) faceMeshes.push(child);
+          }
         });
         scene.add(glb.scene);
         resolve(name);
@@ -79,7 +83,12 @@ function loadModel(name) {
 }
 
 Promise.all(MODEL_PARTS.map(loadModel))
-  .then((names) => console.log("Loaded:", names.join(", ")))
+  .then(() => {
+    console.log("All models loaded. Face meshes with morphs:", faceMeshes.length);
+    if (faceMeshes.length > 0) {
+      import("./ui.js").then(({ initUI }) => initUI(faceMeshes));
+    }
+  })
   .catch((err) => console.error("Model load error:", err));
 
 // ── Resize handler ───────────────────────────────────────────────────────────
