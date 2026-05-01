@@ -48,13 +48,32 @@ export function initUI(meshes, scene, floor, ambientLight, dirLight) {
   buildSliders();
   buildBackgrounds();
   buildLightings();
-  document.getElementById('controls-panel').style.display = 'flex';
 
-  // Toggle panel open/close
+  const panel = document.getElementById('controls-panel');
+  panel.style.display = 'flex';
+
+  const isMobile = () => window.innerWidth <= 600;
+
+  // On mobile start collapsed so avatar is fully visible
+  if (isMobile()) {
+    panel.classList.add('collapsed');
+  } else {
+    // Desktop: panel opens immediately — shrink the renderer
+    dispatchPanelResize(false);
+  }
+
   document.getElementById('panel-toggle').addEventListener('click', () => {
-    const panel = document.getElementById('controls-panel');
     panel.classList.toggle('collapsed');
+    dispatchPanelResize(panel.classList.contains('collapsed'));
   });
+}
+
+// ── Panel resize event ────────────────────────────────────────────────────────
+function dispatchPanelResize(collapsed) {
+  const isMobile = window.innerWidth <= 600;
+  window.dispatchEvent(new CustomEvent('panel-resize', {
+    detail: { width: (!collapsed && !isMobile) ? 280 : 0 },
+  }));
 }
 
 // ── Builders ──────────────────────────────────────────────────────────────────

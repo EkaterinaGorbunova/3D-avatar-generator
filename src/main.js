@@ -96,11 +96,23 @@ Promise.all(MODEL_PARTS.map(loadModel))
   .catch((err) => console.error("Model load error:", err));
 
 // ── Resize handler ───────────────────────────────────────────────────────────
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+let panelWidth = 0; // updated by panel-resize event from ui.js
+
+function resizeToFit() {
+  const isMobile = window.innerWidth <= 600;
+  const w = window.innerWidth - (isMobile ? 0 : panelWidth);
+  const h = window.innerHeight;
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+}
+
+window.addEventListener("resize", resizeToFit);
+
+window.addEventListener("panel-resize", (e) => {
+  panelWidth = e.detail?.width ?? 0;
+  resizeToFit();
 });
 
 // ── Clock for delta time ──────────────────────────────────────────────────────
