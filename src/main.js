@@ -23,7 +23,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 1.55, 2.2);
+camera.position.set(0, 1.4, 3.5);
 scene.add(camera);
 
 // ── Renderer ─────────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.target.set(0, 0.9, 0);
+controls.target.set(0, 1.4, 0);
 
 // ── Floor plane ──────────────────────────────────────────────────────────────
 export const plane = new THREE.Mesh(
