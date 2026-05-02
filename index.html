@@ -12,10 +12,11 @@
 
       /* ── Toggle button ── */
       #panel-toggle {
-        position: fixed; top: 16px; right: 16px; z-index: 100;
+        position: fixed; top: 16px; right: 16px; z-index: 200;
         width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
         background: rgba(255,255,255,0.12); color: #fff; font-size: 20px;
-        backdrop-filter: blur(8px); transition: background 0.2s;
+        backdrop-filter: blur(8px);
+        transition: background 0.2s, right 0.3s ease;
       }
       #panel-toggle:hover { background: rgba(255,255,255,0.22); }
 

@@ -68,10 +68,27 @@ export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight
     dispatchPanelResize(false);
   }
 
-  document.getElementById('panel-toggle').addEventListener('click', () => {
+  const toggleBtn = document.getElementById('panel-toggle');
+
+  function updateTogglePosition() {
+    const collapsed = panel.classList.contains('collapsed');
+    if (window.innerWidth > 600) {
+      toggleBtn.style.right = collapsed ? '16px' : `${280 + 12}px`;
+    } else {
+      toggleBtn.style.right = '';
+    }
+  }
+
+  toggleBtn.addEventListener('click', () => {
     panel.classList.toggle('collapsed');
     dispatchPanelResize(panel.classList.contains('collapsed'));
+    updateTogglePosition();
   });
+
+  window.addEventListener('resize', updateTogglePosition);
+
+  // Начальная позиция
+  updateTogglePosition();
 }
 
 // ── Panel resize event ────────────────────────────────────────────────────────
