@@ -15,7 +15,7 @@ const EMOTION_META = [
 
 // ── Slider controls (symmetric pairs share one slider) ────────────────────────
 const CONTROLS = [
-  { label: 'Smile',         keys: ['mouthSmileLeft',    'mouthSmileRight'] },
+  { label: 'Smile',         keys: ['mouthSmileLeft',    'mouthSmileRight'], max: 0.75 },
   { label: 'Frown',         keys: ['mouthFrownLeft',    'mouthFrownRight'] },
   { label: 'Jaw Open',      keys: ['jawOpen'] },
   { label: 'Brow Down',     keys: ['browDownLeft',      'browDownRight'] },
@@ -29,8 +29,12 @@ const CONTROLS = [
   { label: 'Mouth Pucker',  keys: ['mouthPucker'] },
 ];
 
+// Эмоции с открытым ртом — зубы видны; остальные — скрываем
+const TEETH_VISIBLE_EMOTIONS = new Set(['neutral', 'happy', 'wink', 'surprised', 'fear']);
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let _meshes       = [];
+let _teethMeshes  = [];
 let _scene        = null;
 let _floor        = null;
 let _ambientLight = null;
@@ -38,8 +42,9 @@ let _dirLight     = null;
 const sliderMap   = new Map(); // label → <input>
 
 // ── Public API ────────────────────────────────────────────────────────────────
-export function initUI(meshes, scene, floor, ambientLight, dirLight) {
+export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight) {
   _meshes       = meshes;
+  _teethMeshes  = teethMeshes;
   _scene        = scene;
   _floor        = floor;
   _ambientLight = ambientLight;
@@ -89,6 +94,8 @@ function buildEmotionButtons() {
       document.querySelectorAll('.emotion-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       applyEmotion(_meshes, key);
+      const showTeeth = TEETH_VISIBLE_EMOTIONS.has(key);
+      _teethMeshes.forEach((m) => { m.visible = showTeeth; });
       syncSliders();
     });
     container.appendChild(btn);
@@ -99,7 +106,7 @@ function buildEmotionButtons() {
 
 function buildSliders() {
   const container = document.getElementById('morph-sliders');
-  CONTROLS.forEach(({ label, keys }) => {
+  CONTROLS.forEach(({ label, keys, max }) => {
     const row = document.createElement('div');
     row.className = 'slider-row';
 
@@ -110,12 +117,21 @@ function buildSliders() {
     const input = document.createElement('input');
     input.type = 'range';
     input.min = 0;
-    input.max = 1;
+    input.max = max ?? 1;
     input.step = 0.01;
     input.value = 0;
     input.addEventListener('input', () => {
       const val = parseFloat(input.value);
       keys.forEach((k) => setMorph(_meshes, k, val));
+      // Smile слайдер: чуть приоткрываем верхнюю губу чтобы зубы
+      // были видны, но нижняя губа не теряла контур
+      if (label === 'Smile') {
+        const sliderMax = max ?? 1;
+        const t = val / sliderMax;
+        setMorph(_meshes, 'jawOpen',          t * 0.05);
+        setMorph(_meshes, 'mouthUpperUpLeft',  t * 0.18);
+        setMorph(_meshes, 'mouthUpperUpRight', t * 0.18);
+      }
     });
 
     sliderMap.set(label, input);
