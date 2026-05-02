@@ -1,6 +1,6 @@
 {
     "liveServer.settings.port": 5501,
     "workbench.editorAssociations": {
-        "*.glb": "super-glb-viewer.viewer"
+        "*.glb": "superGlbViewer.glbPreview"
     }
 }
