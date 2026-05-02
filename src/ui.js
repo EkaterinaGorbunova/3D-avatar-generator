@@ -150,14 +150,18 @@ function buildSliders() {
     input.addEventListener('input', () => {
       const val = parseFloat(input.value);
       keys.forEach((k) => setMorph(_meshes, k, val));
-      // Smile слайдер: чуть приоткрываем верхнюю губу чтобы зубы
-      // были видны, но нижняя губа не теряла контур
+
       if (label === 'Smile') {
-        const sliderMax = max ?? 1;
-        const t = val / sliderMax;
+        // Чуть приоткрываем верхнюю губу чтобы зубы были видны
+        const t = val / (max ?? 1);
         setMorph(_meshes, 'jawOpen',          t * 0.05);
         setMorph(_meshes, 'mouthUpperUpLeft',  t * 0.18);
         setMorph(_meshes, 'mouthUpperUpRight', t * 0.18);
+      }
+
+      if (label === 'Jaw Open') {
+        // Показываем зубы когда рот открыт, скрываем когда закрыт
+        _teethMeshes.forEach((m) => { m.visible = val > 0; });
       }
     });
 
