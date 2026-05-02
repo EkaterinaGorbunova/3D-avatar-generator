@@ -1,4 +1,4 @@
-# 3D Avatar — Facial Expression Viewer
+# 3D Avatar - Facial Expression Viewer
 
 Interactive 3D avatar viewer built with Three.js and Vite. Uses a ReadyPlayerMe avatar with ARKit blend shapes to control facial expressions in real time.
 
@@ -42,12 +42,12 @@ npm run preview  # preview the build
 my_3d_avatar/
 ├── public/
 │   └── assets/          # GLB model parts (ReadyPlayerMe avatar)
-│       ├── SK_Kate_Face_Bare.glb
-│       ├── SK_Kate_Body_Bare.glb
-│       ├── SK_Kate_Torso_Bare.glb
-│       ├── SK_Kate_Legs_Bare.glb
-│       ├── SK_Kate_Feet_Bare.glb
-│       └── SK_Kate_Glasses.glb
+│       ├── SK_Face_Bare.glb
+│       ├── SK_Body_Bare.glb
+│       ├── SK_Torso_Bare.glb
+│       ├── SK_Legs_Bare.glb
+│       ├── SK_Feet_Bare.glb
+│       └── SK_Glasses.glb
 ├── src/
 │   ├── main.js          # scene, lighting, camera, model loader
 │   ├── morphs.js        # emotion presets and morph target utilities
