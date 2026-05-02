@@ -195,17 +195,24 @@ function buildDownloadButton() {
     btn.disabled    = true;
     btn.textContent = '⏳ Exporting…';
 
-    // Hide non-avatar objects so they don't end up in the exported file
-    _floor.visible = false;
+    // Hide lights and floor — the receiving app will use its own lighting,
+    // so baking ours in causes washed-out colors in external viewers
+    _floor.visible        = false;
+    _ambientLight.visible = false;
+    _dirLight.visible     = false;
+
+    const restore = () => {
+      _floor.visible        = true;
+      _ambientLight.visible = true;
+      _dirLight.visible     = true;
+    };
 
     const exporter = new GLTFExporter();
     exporter.parse(
       _scene,
       (glb) => {
-        // Restore floor
-        _floor.visible = true;
+        restore();
 
-        // `glb` is an ArrayBuffer when `binary: true`
         const blob = new Blob([glb], { type: 'model/gltf-binary' });
         const url  = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -218,12 +225,12 @@ function buildDownloadButton() {
         btn.textContent = '⬇️ Download GLB';
       },
       (err) => {
-        _floor.visible = true;
+        restore();
         console.error('GLTFExporter error:', err);
         btn.disabled    = false;
         btn.textContent = '⬇️ Download GLB';
       },
-      { binary: true }
+      { binary: true, onlyVisible: true }
     );
   });
 }
