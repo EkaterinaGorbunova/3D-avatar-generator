@@ -98,7 +98,10 @@ export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight
 function dispatchPanelResize(collapsed) {
   const isMobile = window.innerWidth <= 600;
   window.dispatchEvent(new CustomEvent('panel-resize', {
-    detail: { width: (!collapsed && !isMobile) ? 280 : 0 },
+    detail: {
+      width: (!collapsed && !isMobile) ? 280 : 0,
+      mobileOpen: !collapsed && isMobile,
+    },
   }));
 }
 

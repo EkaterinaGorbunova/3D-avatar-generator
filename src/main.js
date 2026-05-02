@@ -110,13 +110,15 @@ Promise.all(MODEL_PARTS.map(loadModel))
   .catch((err) => console.error("Model load error:", err));
 
 // ── Resize handler ───────────────────────────────────────────────────────────
-let panelWidth = 0; // updated by panel-resize event from ui.js
-let resizeRaf  = null;
+let panelWidth    = 0;     // desktop side panel width
+let mobilePanelOpen = false; // mobile bottom panel state
+let resizeRaf     = null;
 
 function resizeToFit() {
-  const isMobile = window.innerWidth <= 600;
+  const isMobile   = window.innerWidth <= 600;
+  const panelH     = (mobilePanelOpen && isMobile) ? Math.round(window.innerHeight * 0.44) : 0;
   const w = window.innerWidth - (isMobile ? 0 : panelWidth);
-  const h = window.innerHeight;
+  const h = window.innerHeight - panelH;
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
@@ -131,7 +133,8 @@ function scheduleResize() {
 window.addEventListener("resize", scheduleResize);
 
 window.addEventListener("panel-resize", (e) => {
-  panelWidth = e.detail?.width ?? 0;
+  panelWidth      = e.detail?.width    ?? 0;
+  mobilePanelOpen = e.detail?.mobileOpen ?? false;
   resizeToFit(); // panel toggle is user-initiated — apply immediately
 });
 
