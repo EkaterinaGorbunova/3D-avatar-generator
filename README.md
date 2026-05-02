@@ -9,6 +9,7 @@ Interactive 3D avatar viewer built with Three.js and Vite. Uses a ReadyPlayerMe 
 - 7 emotion presets (Neutral, Happy, Sad, Angry, Surprised, Disgusted, Fear)
 - 12 fine-control sliders for individual morph targets (Smile, Frown, Jaw, Brows, Eye Blink, Cheek Puff, and more)
 - 63 ARKit morph targets driven via Three.js `morphTargetInfluences`
+- Download the current avatar pose as a `.glb` file
 - Collapsible glassmorphism side panel
 - OrbitControls with damping for smooth camera interaction
 - Vite dev server with hot reload
@@ -71,6 +72,12 @@ happy: {
 ```
 
 The sliders in `src/ui.js` let you tweak individual targets on top of any preset. Symmetric pairs (Left/Right) share a single slider.
+
+## Downloading the Avatar
+
+The **⬇️ Download GLB** button in the side panel exports the current scene to a binary glTF file via Three.js [`GLTFExporter`](https://threejs.org/docs/#examples/en/exporters/GLTFExporter). The active emotion and slider values are baked into the morph target influences, so the downloaded model preserves the exact pose you see on screen.
+
+Before exporting, lights and the floor are temporarily hidden and the render loop is paused — otherwise the scene's lighting would be baked into vertex colors and the model would look washed out in external viewers (Blender, Babylon.js Sandbox, etc.). The file is saved as `<emotion>.glb` (e.g. `happy.glb`).
 
 ## Avatar Model
 
