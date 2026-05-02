@@ -23,12 +23,12 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 1, 4);
+camera.position.set(0, 1.55, 4);
 scene.add(camera);
 
 // ── Renderer ─────────────────────────────────────────────────────────────────
 const canvas = document.querySelector(".webgl");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
@@ -39,7 +39,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.target.set(0, 1, 0);
+controls.target.set(0, 1.55, 0);
 
 // ── Floor plane ──────────────────────────────────────────────────────────────
 export const plane = new THREE.Mesh(
@@ -61,7 +61,8 @@ const MODEL_PARTS = [
 ];
 
 const loader = new GLTFLoader();
-const faceMeshes = []; // meshes with morph targets (Wolf3D_Head, Wolf3D_Teeth)
+const faceMeshes  = []; // все меши с морф-таргетами
+const teethMeshes = []; // только меши зубов
 
 function loadModel(name) {
   return new Promise((resolve, reject) => {
@@ -71,6 +72,19 @@ function loadModel(name) {
         glb.scene.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true;
+
+            const n = child.name.toLowerCase();
+
+            const isTeeth = n.includes("teeth") || n.includes("tooth");
+            const mats = Array.isArray(child.material)
+              ? child.material
+              : [child.material];
+            mats.forEach((m) => {
+              m.depthWrite = true;
+              m.depthTest = true;
+            });
+
+            if (isTeeth) teethMeshes.push(child);
             if (child.morphTargetDictionary) faceMeshes.push(child);
           }
         });
@@ -89,7 +103,7 @@ Promise.all(MODEL_PARTS.map(loadModel))
     initAnimation(scene);
     if (faceMeshes.length > 0) {
       import("./ui.js").then(({ initUI }) =>
-        initUI(faceMeshes, scene, plane, ambientLight, dirLight)
+        initUI(faceMeshes, teethMeshes, scene, plane, ambientLight, dirLight)
       );
     }
   })
