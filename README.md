@@ -1,4 +1,4 @@
-# Kate 3D Avatar — Facial Expression Viewer
+# 3D Avatar — Facial Expression Viewer
 
 Interactive 3D avatar viewer built with Three.js and Vite. Uses a ReadyPlayerMe avatar with ARKit blend shapes to control facial expressions in real time.
 
