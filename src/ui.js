@@ -88,7 +88,11 @@ export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight
     updateTogglePosition();
   });
 
-  window.addEventListener('resize', updateTogglePosition);
+  window.addEventListener('resize', () => {
+    updateTogglePosition();
+    // Re-sync canvas size whenever viewport crosses the mobile/desktop breakpoint
+    dispatchPanelResize(panel.classList.contains('collapsed'));
+  });
 
   // Начальная позиция
   updateTogglePosition();
