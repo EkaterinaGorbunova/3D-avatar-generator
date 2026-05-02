@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { EMOTIONS, setMorph, applyEmotion } from './morphs.js';
 import { BACKGROUNDS, LIGHTINGS, applyBackground, applyLighting } from './environment.js';
 
@@ -54,6 +56,7 @@ export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight
   buildSliders();
   buildBackgrounds();
   buildLightings();
+  buildDownloadButton();
 
   const panel = document.getElementById('controls-panel');
   panel.style.display = 'flex';
@@ -168,6 +171,49 @@ function syncSliders() {
       const idx = mesh.morphTargetDictionary[keys[0]];
       input.value = mesh.morphTargetInfluences[idx];
     }
+  });
+}
+
+// ── Download GLB ──────────────────────────────────────────────────────────────
+function buildDownloadButton() {
+  const btn = document.getElementById('download-btn');
+  btn.addEventListener('click', () => {
+    const activeBtn = document.querySelector('.emotion-btn.active');
+    const emotion   = activeBtn?.dataset.emotion ?? 'avatar';
+
+    btn.disabled    = true;
+    btn.textContent = '⏳ Exporting…';
+
+    // Hide non-avatar objects so they don't end up in the exported file
+    _floor.visible = false;
+
+    const exporter = new GLTFExporter();
+    exporter.parse(
+      _scene,
+      (glb) => {
+        // Restore floor
+        _floor.visible = true;
+
+        // `glb` is an ArrayBuffer when `binary: true`
+        const blob = new Blob([glb], { type: 'model/gltf-binary' });
+        const url  = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href     = url;
+        link.download = `${emotion}.glb`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        btn.disabled    = false;
+        btn.textContent = '⬇️ Download GLB';
+      },
+      (err) => {
+        _floor.visible = true;
+        console.error('GLTFExporter error:', err);
+        btn.disabled    = false;
+        btn.textContent = '⬇️ Download GLB';
+      },
+      { binary: true }
+    );
   });
 }
 
