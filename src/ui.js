@@ -35,22 +35,26 @@ const CONTROLS = [
 const TEETH_VISIBLE_EMOTIONS = new Set(['neutral', 'happy', 'wink', 'surprised', 'fear']);
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let _meshes       = [];
-let _teethMeshes  = [];
-let _scene        = null;
-let _floor        = null;
-let _ambientLight = null;
-let _dirLight     = null;
-const sliderMap   = new Map(); // label → <input>
+let _meshes        = [];
+let _teethMeshes   = [];
+let _scene         = null;
+let _floor         = null;
+let _ambientLight  = null;
+let _dirLight      = null;
+let _fillLight     = null;
+let _setPaused     = (_) => {};
+const sliderMap    = new Map(); // label → <input>
 
 // ── Public API ────────────────────────────────────────────────────────────────
-export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight) {
+export function initUI(meshes, teethMeshes, scene, floor, ambientLight, dirLight, fillLight, setPaused) {
   _meshes       = meshes;
   _teethMeshes  = teethMeshes;
   _scene        = scene;
   _floor        = floor;
   _ambientLight = ambientLight;
   _dirLight     = dirLight;
+  _fillLight    = fillLight;
+  _setPaused    = setPaused ?? ((_) => {});
 
   buildEmotionButtons();
   buildSliders();
@@ -195,16 +199,22 @@ function buildDownloadButton() {
     btn.disabled    = true;
     btn.textContent = '⏳ Exporting…';
 
+    // Pause render loop so hiding lights doesn't cause a visible blink
+    _setPaused(true);
+
     // Hide lights and floor — the receiving app will use its own lighting,
     // so baking ours in causes washed-out colors in external viewers
     _floor.visible        = false;
     _ambientLight.visible = false;
     _dirLight.visible     = false;
+    _fillLight.visible    = false;
 
     const restore = () => {
       _floor.visible        = true;
       _ambientLight.visible = true;
       _dirLight.visible     = true;
+      _fillLight.visible    = true;
+      _setPaused(false);
     };
 
     const exporter = new GLTFExporter();

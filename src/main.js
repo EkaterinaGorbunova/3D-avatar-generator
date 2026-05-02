@@ -16,6 +16,11 @@ dirLight.position.set(2, 2, 5);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
+// Fill light from the left to eliminate harsh shadow on avatar's left side
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+fillLight.position.set(-3, 1, 2);
+scene.add(fillLight);
+
 // ── Camera ───────────────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(
   50,
@@ -105,7 +110,8 @@ Promise.all(MODEL_PARTS.map(loadModel))
     initAnimation(scene);
     if (faceMeshes.length > 0) {
       import("./ui.js").then(({ initUI }) =>
-        initUI(faceMeshes, teethMeshes, scene, plane, ambientLight, dirLight)
+        initUI(faceMeshes, teethMeshes, scene, plane, ambientLight, dirLight, fillLight,
+               (paused) => { _renderPaused = paused; })
       );
     }
   })
@@ -143,10 +149,12 @@ window.addEventListener("panel-resize", (e) => {
 // ── Clock for delta time ──────────────────────────────────────────────────────
 const clock = new THREE.Clock();
 let prevTime = 0;
+let _renderPaused = false;
 
 // ── Render loop ──────────────────────────────────────────────────────────────
 function animate() {
   requestAnimationFrame(animate);
+  if (_renderPaused) return; // hold last frame while exporting
   const elapsed = clock.getElapsedTime();
   const delta   = elapsed - prevTime;
   prevTime = elapsed;
