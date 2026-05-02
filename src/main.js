@@ -111,6 +111,7 @@ Promise.all(MODEL_PARTS.map(loadModel))
 
 // ── Resize handler ───────────────────────────────────────────────────────────
 let panelWidth = 0; // updated by panel-resize event from ui.js
+let resizeRaf  = null;
 
 function resizeToFit() {
   const isMobile = window.innerWidth <= 600;
@@ -122,11 +123,16 @@ function resizeToFit() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 }
 
-window.addEventListener("resize", resizeToFit);
+function scheduleResize() {
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeToFit(); });
+}
+
+window.addEventListener("resize", scheduleResize);
 
 window.addEventListener("panel-resize", (e) => {
   panelWidth = e.detail?.width ?? 0;
-  resizeToFit();
+  resizeToFit(); // panel toggle is user-initiated — apply immediately
 });
 
 // ── Clock for delta time ──────────────────────────────────────────────────────
