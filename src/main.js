@@ -67,7 +67,14 @@ const MODEL_PARTS = [
   "SK_Kate_Glasses",
 ];
 
-const loader = new GLTFLoader();
+// LoadingManager drives the spinner overlay; onProgress fires after each part finishes
+const loadingManager = new THREE.LoadingManager();
+const progressEl = document.getElementById("loading-progress");
+loadingManager.onProgress = (_url, loaded, total) => {
+  if (progressEl) progressEl.textContent = Math.round((loaded / total) * 100) + "%";
+};
+
+const loader = new GLTFLoader(loadingManager);
 const faceMeshes  = []; // все меши с морф-таргетами
 const teethMeshes = []; // только меши зубов
 
@@ -95,8 +102,9 @@ function loadModel(name) {
             if (child.morphTargetDictionary) faceMeshes.push(child);
           }
         });
-        scene.add(glb.scene);
-        resolve(name);
+        // Don't add to scene yet — defer until all parts are ready so the user
+        // never sees the avatar pop in piece by piece
+        resolve(glb.scene);
       },
       undefined,
       (err) => reject(err)
@@ -104,9 +112,24 @@ function loadModel(name) {
   });
 }
 
+function hideLoadingOverlay() {
+  const overlay = document.getElementById("loading-overlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+  setTimeout(() => overlay.remove(), 500);
+}
+
 Promise.all(MODEL_PARTS.map(loadModel))
-  .then(() => {
-    console.log("All models loaded. Face meshes with morphs:", faceMeshes.length);
+  .then((parts) => {
+    // Add all parts at once — single visual reveal
+    parts.forEach((p) => scene.add(p));
+
+    // Pre-compile shaders so the first visible frame doesn't stutter
+    renderer.compile(scene, camera);
+    // Render one full frame before fading out the overlay so the user sees
+    // the finished avatar, not an empty scene
+    renderer.render(scene, camera);
+
     initAnimation(scene);
     if (faceMeshes.length > 0) {
       import("./ui.js").then(({ initUI }) =>
@@ -114,8 +137,13 @@ Promise.all(MODEL_PARTS.map(loadModel))
                (paused) => { _renderPaused = paused; })
       );
     }
+
+    hideLoadingOverlay();
   })
-  .catch((err) => console.error("Model load error:", err));
+  .catch((err) => {
+    console.error("Model load error:", err);
+    if (progressEl) progressEl.textContent = "failed";
+  });
 
 // ── Resize handler ───────────────────────────────────────────────────────────
 let panelWidth    = 0;     // desktop side panel width
