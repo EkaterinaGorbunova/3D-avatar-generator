@@ -40,6 +40,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.target.set(0, 1.4, 0);
+controls.minDistance = 0.5; // не позволяет провалиться внутрь аватара
+controls.maxDistance = 8;   // разумный лимит отдаления
 
 // ── Floor plane ──────────────────────────────────────────────────────────────
 export const plane = new THREE.Mesh(
