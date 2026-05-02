@@ -74,4 +74,4 @@ The sliders in `src/ui.js` let you tweak individual targets on top of any preset
 
 ## Avatar Model
 
-Created with [ReadyPlayerMe](https://readyplayer.me/), exported as separate GLB parts for modular loading.
+Created with ReadyPlayerMe (discontinued Jan 2026, acquired by Netflix), exported as separate GLB parts for modular loading.
